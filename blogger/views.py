@@ -23,11 +23,11 @@ class PostListCreateView(generics.ListCreateAPIView):
 class PostRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
-    permission_classes = [permissions.IsAuthenticated]  # Ensure proper authentication
-    lookup_field = 'pid'  # Specify the lookup field
+    permission_classes = [permissions.IsAuthenticated]
+    lookup_field = 'pid'
 
     def perform_update(self, serializer):
-        serializer.save()  # Confirm perform_update correctly saves the serializer data
+        serializer.save()
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
