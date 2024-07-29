@@ -1,13 +1,12 @@
 import '../styles/global.css';
-import { CookiesProvider } from 'react-cookie';
+import Layout from '../components/layout';
 
-export default function App({
-  Component,
-  pageProps: { session, ...pageProps },
-}) {
+function MyApp({ Component, pageProps }) {
   return (
-    <CookiesProvider>
+    <Layout pageTitle={Component.pageTitle}>
       <Component {...pageProps} />
-    </CookiesProvider>
+    </Layout>
   );
 }
+
+export default MyApp;
