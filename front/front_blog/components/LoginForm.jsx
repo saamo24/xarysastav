@@ -155,6 +155,8 @@ const LoginForm = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
   const router = useRouter();
 
   const handleLogin = async (e) => {
@@ -170,9 +172,11 @@ const LoginForm = () => {
         console.log('Access Token:', access); // Debugging
         console.log('Refresh Token:', refresh); // Debugging
         localStorage.setItem('accessToken', access);
+        setCookie('accessToken', access);
         localStorage.setItem('refreshToken', refresh);
         setCookie('username', username);
-        // router.push('/post'); // Redirect after login
+        setIsAuthenticated(true);
+        router.push('/post'); // Redirect after login
       } else {
         setError('Login failed. Please check your credentials and try again.');
       }
@@ -191,19 +195,19 @@ const LoginForm = () => {
       <h1>Login</h1>
       <form onSubmit={handleLogin}>
         <div>
-          <label>Username:</label>
           <input
             type="text"
             value={username}
+            placeholder='Username'
             onChange={(e) => setUsername(e.target.value)}
             required
           />
         </div>
         <div>
-          <label>Password:</label>
           <input
             type="password"
             value={password}
+            placeholder='Password'
             onChange={(e) => setPassword(e.target.value)}
             required
           />
