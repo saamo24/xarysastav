@@ -12,7 +12,7 @@ class Post(models.Model):
     pid = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     content = models.TextField(max_length=255)
     poster = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
-    date = models.DateField(auto_now=True)
+    date = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.content

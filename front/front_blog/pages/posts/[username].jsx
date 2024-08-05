@@ -1,4 +1,3 @@
-// pages/posts/[username].jsx
 import React from 'react';
 import UserPosts from '../../components/PostPage';
 import { getCookie, setCookie } from 'cookies-next';

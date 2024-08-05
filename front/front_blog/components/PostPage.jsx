@@ -1,4 +1,3 @@
-// components/UserPosts.jsx
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/router';

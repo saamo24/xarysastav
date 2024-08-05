@@ -1,12 +1,11 @@
-
-// pages/post.jsx
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Layout from '../components/layout';
 import { useRouter } from 'next/router';
 import { getCookie, deleteCookie, setCookie } from 'cookies-next';
 import Link from 'next/link';
-import CreatePostPopup from '../components/CreatePostPopup'
+import CreatePostPopup from '../components/CreatePostPopup';
+import EditPostPopup from '../components/EditPostPopup'; // Import your EditPostPopup component
 
 const BaseURL = 'http://localhost:8000';
 
@@ -15,8 +14,10 @@ const PostPage = ({ initialPosts, initialUsername }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [posts, setPosts] = useState(initialPosts);
   const [username, setUsername] = useState(initialUsername);
-  const router = useRouter();
   const [isPopupOpen, setIsPopupOpen] = useState(false); // State to control popup visibility
+  const [editPost, setEditPost] = useState(null); // State to manage which post to edit
+  const [isEditPopupOpen, setIsEditPopupOpen] = useState(false); // State to control edit popup visibility
+  const router = useRouter();
 
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
@@ -64,6 +65,17 @@ const PostPage = ({ initialPosts, initialUsername }) => {
     router.reload();
   };
 
+  const handlePostUpdated = (updatedPost) => {
+    setPosts(posts.map(post => post.pid === updatedPost.pid ? updatedPost : post));
+    setIsEditPopupOpen(false);
+    router.reload();
+  };
+
+  const handleEditClick = (post) => {
+    setEditPost(post);
+    setIsEditPopupOpen(true);
+  };
+
   const sortedPosts = posts.sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort posts by date in descending order
 
   return (
@@ -77,6 +89,15 @@ const PostPage = ({ initialPosts, initialUsername }) => {
         accessToken={accessToken}
         onPostCreated={handlePostCreated}
       />
+      {editPost && (
+        <EditPostPopup
+          isOpen={isEditPopupOpen}
+          onClose={() => setIsEditPopupOpen(false)}
+          accessToken={accessToken}
+          post={editPost}
+          onPostUpdated={handlePostUpdated}
+        />
+      )}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px' }}>
         {isAuthenticated ? (
           <>
@@ -88,11 +109,21 @@ const PostPage = ({ initialPosts, initialUsername }) => {
         <div>
           {posts.length > 0 ? (
             posts.map((post) => (
-              <div key={post.pid} style={{ marginBottom: '20px', border: '1px solid #0ced6a', padding: '10px', borderRadius: '15px', display: 'auto' }}>
+              <div key={post.pid} style={{ marginBottom: '20px', border: '1px solid #0ced6a', padding: '10px', borderRadius: '15px' }}>
                 <p>{post.content}</p>
                 <p>Date: {post.date}</p>
-                <p>reporter: <Link href={`/posts/${post.poster_username}`} passHref>
-                <span style={{ color: '#0ced6a', textDecoration: 'underline', cursor: 'pointer' }}> {post.poster_username} </span> </Link> </p>
+                <p>
+                  Reporter: <Link href={`/posts/${post.poster_username}`} passHref>
+                    <span style={{ color: '#0ced6a', textDecoration: 'underline', cursor: 'pointer' }}>
+                      {post.poster_username}
+                    </span>
+                  </Link>
+                </p>
+                {isAuthenticated && post.poster_username === username && (
+                  <button onClick={() => handleEditClick(post)} style={{ marginTop: '10px' }}>
+                    Edit
+                  </button>
+                )}
               </div>
             ))
           ) : (
