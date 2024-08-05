@@ -1,22 +1,16 @@
-
-// pages/post.jsx
+// pages/[username].jsx
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Layout from '../components/layout';
 import { useRouter } from 'next/router';
-import { getCookie, deleteCookie, setCookie } from 'cookies-next';
-import Link from 'next/link';
-import CreatePostPopup from '../components/CreatePostPopup'
+import { getCookie, setCookie, deleteCookie } from 'cookies-next';
 
 const BaseURL = 'http://localhost:8000';
 
-const PostPage = ({ initialPosts, initialUsername }) => {
+const UserPostsPage = ({ posts, username }) => {
   const [accessToken, setAccessToken] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [posts, setPosts] = useState(initialPosts);
-  const [username, setUsername] = useState(initialUsername);
   const router = useRouter();
-  const [isPopupOpen, setIsPopupOpen] = useState(false); // State to control popup visibility
 
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
@@ -59,44 +53,25 @@ const PostPage = ({ initialPosts, initialUsername }) => {
     }
   };
 
-  const handlePostCreated = (newPost) => {
-    setPosts([newPost, ...posts]);
-    router.reload();
-  };
-
-  const sortedPosts = posts.sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort posts by date in descending order
-
   return (
-    <Layout pageTitle="Posts" handleLogout={isAuthenticated ? handleLogout : null}>
-      <button onClick={() => setIsPopupOpen(true)} style={{ cursor: 'pointer' }}>
-        Create Post
-      </button>
-      <CreatePostPopup
-        isOpen={isPopupOpen}
-        onClose={() => setIsPopupOpen(false)}
-        accessToken={accessToken}
-        onPostCreated={handlePostCreated}
-      />
+    <Layout pageTitle={`Posts by ${username}`} handleLogout={isAuthenticated ? handleLogout : null}>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px' }}>
         {isAuthenticated ? (
-          <>
-            <h2>Bonsoir `{username}`</h2>
-          </>
+          <h2>Posts by `{username}`</h2>
         ) : (
           <h2>Please log in to see the posts.</h2>
         )}
         <div>
           {posts.length > 0 ? (
             posts.map((post) => (
-              <div key={post.pid} style={{ marginBottom: '20px', border: '1px solid #0ced6a', padding: '10px', borderRadius: '15px', display: 'auto' }}>
+              <div key={post.pid} style={{ marginBottom: '20px', border: '1px solid #0ced6a', padding: '10px', borderRadius: '15px' }}>
                 <p>{post.content}</p>
                 <p>Date: {post.date}</p>
-                <p>reporter: <Link href={`/posts/${post.poster_username}`} passHref>
-                <span style={{ color: '#0ced6a', textDecoration: 'underline', cursor: 'pointer' }}> {post.poster_username} </span> </Link> </p>
+                <p>Reporter: {post.poster_username}</p>
               </div>
             ))
           ) : (
-            <p>No posts available</p>
+            <p>No posts available for this user.</p>
           )}
         </div>
       </div>
@@ -105,15 +80,14 @@ const PostPage = ({ initialPosts, initialUsername }) => {
 };
 
 export async function getServerSideProps(context) {
+  const { username } = context.query;
   const req = context.req;
   const res = context.res;
-  const username = getCookie('username', { req, res });
   const accessToken = getCookie('accessToken', { req, res });
-  const refreshToken = getCookie('refreshToken', { req, res });
 
-  const fetchPosts = async (token) => {
+  const fetchUserPosts = async (token, username) => {
     try {
-      const response = await axios.get(`${BaseURL}/api/post/`, {
+      const response = await axios.get(`${BaseURL}/api/post/${username}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -121,49 +95,56 @@ export async function getServerSideProps(context) {
       });
       return response.data;
     } catch (error) {
-      console.error('Error fetching posts:', error);
+      console.error('Error fetching user posts:', error);
       throw error;
     }
   };
 
   try {
-    const posts = await fetchPosts(accessToken);
+    const posts = await fetchUserPosts(accessToken, username);
     return {
       props: {
-        initialPosts: posts,
-        initialUsername: username || false,
+        posts,
+        username,
       },
     };
   } catch (error) {
     if (error.response && error.response.data.code === 'token_not_valid') {
+      // Token is not valid; handle token refresh
       try {
+        const refreshToken = getCookie('refreshToken', { req, res });
         const response = await axios.post(`${BaseURL}/api/user/login/refresh/`, { refresh: refreshToken });
         const newAccessToken = response.data.access;
+        
+        // Set new access token as cookie
         setCookie('accessToken', newAccessToken, { req, res });
-        const posts = await fetchPosts(newAccessToken);
+
+        // Retry fetching posts with new access token
+        const posts = await fetchUserPosts(newAccessToken, username);
         return {
           props: {
-            initialPosts: posts,
-            initialUsername: username || false,
+            posts,
+            username,
           },
         };
       } catch (refreshError) {
         console.error('Error refreshing token:', refreshError);
         return {
           props: {
-            initialPosts: [],
-            initialUsername: username || false,
+            posts: [],
+            username,
           },
         };
       }
     }
+
     return {
       props: {
-        initialPosts: [],
-        initialUsername: username || false,
+        posts: [],
+        username,
       },
     };
   }
 }
 
-export default PostPage;
+export default UserPostsPage;
