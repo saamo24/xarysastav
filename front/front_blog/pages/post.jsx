@@ -108,7 +108,7 @@ const PostPage = ({ initialPosts, initialUsername }) => {
         )}
         <div>
           {posts.length > 0 ? (
-            posts.map((post) => (
+            sortedPosts.map((post) => (
               <div key={post.pid} style={{ marginBottom: '20px', border: '1px solid #0ced6a', padding: '10px', borderRadius: '15px' }}>
                 <p>{post.content}</p>
                 <p>Date: {post.date}</p>
