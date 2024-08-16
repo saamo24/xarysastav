@@ -6,6 +6,8 @@ import { getCookie, deleteCookie, setCookie } from 'cookies-next';
 import Link from 'next/link';
 import CreatePostPopup from '../components/CreatePostPopup';
 import EditPostPopup from '../components/EditPostPopup';
+import { MdDelete } from "react-icons/md";
+
 
 const BaseURL = 'http://localhost:8000';
 
@@ -134,6 +136,7 @@ const PostPage = ({ initialPosts, initialUsername }) => {
       alignItems: 'center',
       zIndex: 1000
     }}>
+
       <div style={{
         backgroundColor: 'black',
         padding: '1.5rem',
@@ -177,11 +180,24 @@ const PostPage = ({ initialPosts, initialUsername }) => {
                     <button onClick={() => handleEditClick(post)} style={{ marginTop: '10px' }}>
                       Edit
                     </button>
-                    <span
+                    {/* <span
                       onClick={() => handleDeleteClick(post)}
                       style={{ position: 'absolute', bottom: '10px', right: '10px', fontSize: '24px', cursor: 'pointer'}}
                     >
-                      🚮
+                      🚮 
+                    </span> */}
+                    <span
+                      onClick={() => handleDeleteClick(post)}
+                      style={{
+                        position: 'absolute',
+                        bottom: '10px',
+                        right: '10px',
+                        fontSize: '24px',
+                        cursor: 'pointer',
+                        color: 'green'
+                      }}
+                    >
+                      <MdDelete />
                     </span>
                   </>
                 )}
