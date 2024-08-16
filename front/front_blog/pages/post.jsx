@@ -8,7 +8,6 @@ import CreatePostPopup from '../components/CreatePostPopup';
 import EditPostPopup from '../components/EditPostPopup';
 import { MdDelete } from "react-icons/md";
 
-
 const BaseURL = 'http://localhost:8000';
 
 const PostPage = ({ initialPosts, initialUsername }) => {
@@ -21,6 +20,7 @@ const PostPage = ({ initialPosts, initialUsername }) => {
   const [isEditPopupOpen, setIsEditPopupOpen] = useState(false);
   const [deletePost, setDeletePost] = useState(null);
   const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
+  const [notification, setNotification] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -66,11 +66,15 @@ const PostPage = ({ initialPosts, initialUsername }) => {
 
   const handlePostCreated = (newPost) => {
     setPosts([newPost, ...posts]);
+    setNotification("Post successfully created!");
+    setTimeout(() => setNotification(null), 5000); 
     router.reload();
   };
 
   const handlePostUpdated = (updatedPost) => {
     setPosts(posts.map(post => (post.pid === updatedPost.pid ? updatedPost : post)));
+    setNotification("Post successfully updated!");
+    setTimeout(() => setNotification(null), 5000);
     setIsEditPopupOpen(false);
     router.reload();
   };
@@ -94,6 +98,8 @@ const PostPage = ({ initialPosts, initialUsername }) => {
         },
       });
       setPosts(posts.filter(post => post.pid !== deletePost.pid));
+      setNotification("Post successfully deleted!");
+      setTimeout(() => setNotification(null), 5000);
       setIsDeletePopupOpen(false);
       router.reload();
     } catch (error) {
@@ -101,10 +107,26 @@ const PostPage = ({ initialPosts, initialUsername }) => {
     }
   };
 
-  const sortedPosts = posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+  const sortedPosts = posts?.sort((a, b) => new Date(b.date) - new Date(a.date));
 
   return (
     <Layout pageTitle="Posts" handleLogout={isAuthenticated ? handleLogout : null}>
+      {notification && (
+        <div style={{
+          backgroundColor: '#0ced6a',
+          color: 'black',
+          padding: '10px',
+          borderRadius: '5px',
+          position: 'fixed',
+          top: '20px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 1000
+        }}>
+          {notification}
+        </div>
+      )}
+      
       <button onClick={() => setIsPopupOpen(true)} style={{ cursor: 'pointer' }}>
         Create Post
       </button>
@@ -123,36 +145,36 @@ const PostPage = ({ initialPosts, initialUsername }) => {
           onPostUpdated={handlePostUpdated}
         />
       )}
-  {isDeletePopupOpen && (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      zIndex: 1000
-    }}>
-
-      <div style={{
-        backgroundColor: 'black',
-        padding: '1.5rem',
-        borderRadius: '0.5rem',
-        border: '1px solid #0ced6a',
-        boxShadow: '0 0.5rem 1rem rgba(0, 0, 0, 0.1)',
-        maxWidth: '24rem',
-        width: '100%',
-        textAlign: 'center'
-      }}>
-        <p>Are you sure you want to delete this post?</p>
-        <button onClick={handleDeletePost} style={{ marginRight: '10px' }}>Yes</button>
-        <button onClick={() => setIsDeletePopupOpen(false)}>No</button>
-      </div>
-    </div>
-  )}
+      
+      {isDeletePopupOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'black',
+            padding: '1.5rem',
+            borderRadius: '0.5rem',
+            border: '1px solid #0ced6a',
+            boxShadow: '0 0.5rem 1rem rgba(0, 0, 0, 0.1)',
+            maxWidth: '24rem',
+            width: '100%',
+            textAlign: 'center'
+          }}>
+            <p>Are you sure you want to delete this post?</p>
+            <button onClick={handleDeletePost} style={{ marginRight: '10px' }}>Yes</button>
+            <button onClick={() => setIsDeletePopupOpen(false)}>No</button>
+          </div>
+        </div>
+      )}
 
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px' }}>
         {isAuthenticated ? (
@@ -163,7 +185,7 @@ const PostPage = ({ initialPosts, initialUsername }) => {
           <h2>Please log in to see the posts.</h2>
         )}
         <div>
-          {posts.length > 0 ? (
+          {posts?.length > 0 ? (
             posts.map((post) => (
               <div key={post.pid} style={{ marginBottom: '20px', border: '1px solid #0ced6a', padding: '10px', borderRadius: '15px', position: 'relative' }}>
                 <p>{post.content}</p>
@@ -180,12 +202,6 @@ const PostPage = ({ initialPosts, initialUsername }) => {
                     <button onClick={() => handleEditClick(post)} style={{ marginTop: '10px' }}>
                       Edit
                     </button>
-                    {/* <span
-                      onClick={() => handleDeleteClick(post)}
-                      style={{ position: 'absolute', bottom: '10px', right: '10px', fontSize: '24px', cursor: 'pointer'}}
-                    >
-                      🚮 
-                    </span> */}
                     <span
                       onClick={() => handleDeleteClick(post)}
                       style={{
