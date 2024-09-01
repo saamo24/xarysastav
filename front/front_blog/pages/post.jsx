@@ -8,7 +8,7 @@ import CreatePostPopup from '../components/CreatePostPopup';
 import EditPostPopup from '../components/EditPostPopup';
 import { MdDelete } from "react-icons/md";
 
-const BaseURL = 'http://localhost:8000';
+const BaseURL = 'http://api:8000';
 
 const PostPage = ({ initialPosts, initialUsername }) => {
   const [accessToken, setAccessToken] = useState(null);

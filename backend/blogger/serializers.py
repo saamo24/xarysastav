@@ -10,8 +10,8 @@ class PostSerializer(serializers.ModelSerializer):
         read_only_fields = ['pid', 'poster', 'date']
 
     def get_poster_username(self, obj):
-        return obj.poster.username  # Assuming the User model has a 'username' field
-
+        return obj.poster.username 
+    
     def create(self, validated_data):
         validated_data['poster'] = self.context['request'].user
         post = Post.objects.create(**validated_data)

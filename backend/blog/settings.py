@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-u_#m+7!!n&7o-ev)#_97vi-m8_c5fez=h17s63x%$%9g^drbi*
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*', 'api',]
 
 
 # Application definition
@@ -49,7 +49,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
+    # 'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -114,7 +114,7 @@ DATABASES = {
         'NAME': 'blog', 
         'USER': 'blogger', 
         'PASSWORD': 'Blogger123~',
-        'HOST': 'localhost', #db
+        'HOST': 'db', #db localhost
         'PORT': '5432',
     }
 }

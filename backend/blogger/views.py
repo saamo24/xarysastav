@@ -1,8 +1,10 @@
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, status
 from rest_framework.exceptions import PermissionDenied
 from .models import Post
 from .serializers import PostSerializer
 from rest_framework.response import Response
+from rest_framework.views import APIView
+from django.http import JsonResponse, HttpResponseNotFound
 
 
 class PostListCreateView(generics.ListCreateAPIView):
@@ -43,3 +45,17 @@ class UserPostListView(generics.ListAPIView):
     def get_queryset(self):
         username = self.kwargs['username']
         return Post.objects.filter(poster__username=username)
+
+
+class DeletePostView(APIView):
+    def delete(self, request, *args, **kwargs):
+        pid = kwargs.get('pid')  # Extract the post ID from URL
+        try:
+            # Retrieve and delete the post
+            post = Post.objects.get(pid=pid)
+            post.delete()
+            return JsonResponse({'detail': 'Post successfully deleted.'}, status=204)
+        except Post.DoesNotExist:
+            return HttpResponseNotFound(JsonResponse({'detail': 'Post not found.'}, status=404))
+        except Exception as e:
+            return JsonResponse({'detail': str(e)}, status=400)
