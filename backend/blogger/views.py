@@ -46,16 +46,3 @@ class UserPostListView(generics.ListAPIView):
         username = self.kwargs['username']
         return Post.objects.filter(poster__username=username)
 
-
-class DeletePostView(APIView):
-    def delete(self, request, *args, **kwargs):
-        pid = kwargs.get('pid')  # Extract the post ID from URL
-        try:
-            # Retrieve and delete the post
-            post = Post.objects.get(pid=pid)
-            post.delete()
-            return JsonResponse({'detail': 'Post successfully deleted.'}, status=204)
-        except Post.DoesNotExist:
-            return HttpResponseNotFound(JsonResponse({'detail': 'Post not found.'}, status=404))
-        except Exception as e:
-            return JsonResponse({'detail': str(e)}, status=400)
