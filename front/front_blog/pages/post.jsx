@@ -38,7 +38,7 @@ const PostPage = ({ initialPosts, initialUsername }) => {
       if (!accessToken) return;
 
       const response = await axios.post(
-        `${BaseURL}/api/user/logout/`,
+        `http://localhost:8000/api/user/logout/`,
         { refresh_token: localStorage.getItem('refreshToken') },
         {
           headers: {
@@ -91,7 +91,7 @@ const PostPage = ({ initialPosts, initialUsername }) => {
 
   const handleDeletePost = async () => {
     try {
-      await axios.delete(`${BaseURL}/api/post/${deletePost.pid}/`, {
+      await axios.delete(`http://localhost:8000/api/post/${deletePost.pid}/`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
